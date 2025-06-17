@@ -1,0 +1,92 @@
+###id = 1
+GET localhost:8080/order?id=1
+###
+GET localhost:8080/order?comment=Регулярна
+
+###
+GET localhost:8080/order?comment=Регулярна&lang=en
+
+###
+GET localhost:8080/order?comment=Регулярна&lang=ru
+
+###
+GET localhost:8080/order?comment=заказ&comment_operator=ends&lang=ru
+
+###
+GET localhost:8080/order?comment=заказ&comment_operator=contains&lang=ru
+
+### source_location + comment
+GET localhost:8080/order?source_location_id=2&comment=Между
+
+### все заказы
+GET localhost:8080/order
+
+### два ID #TODO
+GET localhost:8080/order?id=1&id=2
+
+### создать заказ
+POST localhost:8080/order
+Content-Type: application/json
+
+{
+    "comment": {
+        "ru": "Файл",
+        "en": "File"
+    },
+    "source_location": {
+        "name":{
+            "ru": "Порт #43",
+            "en": "Port #43"
+        },
+        "address": "ул. Портовая 12а"
+    },
+    "destination_location": {
+        "name":{
+            "ru": "Порт #44",
+            "en": "Port #44"
+        },
+        "address": "ул. Ушакова 14"
+    },
+    "total_weight_measure_unit_code": "kg",
+    "total_volume_measure_unit_code": "m3",
+    "items": [
+        {
+            "product": {
+                "name":{
+                    "ru":"Ягоды",
+                    "en":"Berry"
+                }
+            },
+            "item_index": 1,
+            "weight_value": 10,
+            "weight_measure_unit_code": "kg",
+            "volume_value": 3.0,
+            "volume_measure_unit_code": "m3"
+        },
+        {
+            "product": {
+                "name":{
+                    "ru":"Aрбуз",
+                    "en":"Watermelon"
+                }
+            },
+            "item_index": 2,
+            "weight_value": 2.0,
+            "weight_measure_unit_code": "kg",
+            "volume_value": 1.0,
+            "volume_measure_unit_code": "m3"
+        }
+    ]
+}
+
+###
+POST localhost:8080/order
+Content-Type: application/json
+
+{
+  "id": 4,
+  "comment": {
+    "ru": "Измененное название",
+    "en": "Changed name"
+  }
+}

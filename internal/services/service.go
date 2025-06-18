@@ -7,7 +7,7 @@ import (
 
 type Order interface {
 	DeleteById(id int) error
-	Save(orderUpd models.OrderRequest) (models.Orders, error)
+	Save(orderUpd models.Orders) (models.Orders, error)
 	Select(filter models.OrderFilter) ([]models.Orders, error)
 }
 type Service struct {

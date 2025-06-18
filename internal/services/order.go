@@ -14,7 +14,7 @@ func (s *OrderService) Select(filter models.OrderFilter) ([]models.Orders, error
 
 }
 
-func (s *OrderService) Save(orderUpd models.OrderRequest) (models.Orders, error) {
+func (s *OrderService) Save(orderUpd models.Orders) (models.Orders, error) {
 	return s.repo.Save(orderUpd)
 }
 

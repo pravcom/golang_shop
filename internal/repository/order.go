@@ -131,7 +131,7 @@ func getOperator(op *string, defaultOp string) string {
 	return *op
 }
 
-func (r *OrderRepository) Save(orderUpd models.OrderRequest) (models.Orders, error) {
+func (r *OrderRepository) Save(orderUpd models.Orders) (models.Orders, error) {
 	transaction := r.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -141,13 +141,13 @@ func (r *OrderRepository) Save(orderUpd models.OrderRequest) (models.Orders, err
 
 	var order models.Orders
 	//обрабатываем Locations
-	sourceLocation, err := r.UpdateLocations(transaction, &orderUpd.SourceLocation)
+	sourceLocation, err := r.UpdateLocations(transaction, orderUpd.SourceLocation)
 	if err != nil {
 		transaction.Rollback()
 		return order, err
 	}
 
-	destinationLocation, err := r.UpdateLocations(transaction, &orderUpd.DestinationLocation)
+	destinationLocation, err := r.UpdateLocations(transaction, orderUpd.DestinationLocation)
 	if err != nil {
 		transaction.Rollback()
 		return order, err
@@ -161,7 +161,7 @@ func (r *OrderRepository) Save(orderUpd models.OrderRequest) (models.Orders, err
 
 	if orderUpd.Id != nil {
 		//Обновление
-		order.Id = *orderUpd.Id
+		order.Id = orderUpd.Id
 		err := transaction.Model(&order).Updates(&order).Error
 		if err != nil {
 			transaction.Rollback()
@@ -184,10 +184,12 @@ func (r *OrderRepository) Save(orderUpd models.OrderRequest) (models.Orders, err
 	}
 
 	// Обрабатываем Items
-	_, err = r.UpdateItems(transaction, order.Id, orderUpd.Items)
-	if err != nil {
-		transaction.Rollback()
-		return order, err
+	if orderUpd.Items != nil {
+		_, err = r.UpdateItems(transaction, *order.Id, *orderUpd.Items)
+		if err != nil {
+			transaction.Rollback()
+			return order, err
+		}
 	}
 
 	err = transaction.Commit().Error
@@ -195,7 +197,7 @@ func (r *OrderRepository) Save(orderUpd models.OrderRequest) (models.Orders, err
 		return order, err
 	}
 
-	fullOrder, err := r.getFullOrder(order.Id)
+	fullOrder, err := r.getFullOrder(*order.Id)
 	if err != nil {
 		return order, err
 	}
@@ -220,96 +222,75 @@ func (r *OrderRepository) getFullOrder(id uint64) (models.Orders, error) {
 	return order, nil
 }
 
-func (r *OrderRepository) UpdateItems(transaction *gorm.DB, orderId uint64, itemUpd []models.OrderItemRequest) ([]models.OrderItems, error) {
-	var item models.OrderItems
+func (r *OrderRepository) UpdateItems(transaction *gorm.DB, orderId uint64, itemsUpd []models.OrderItems) ([]models.OrderItems, error) {
 	var items []models.OrderItems
 
-	for _, itemUpd := range itemUpd {
+	for _, itemUpd := range itemsUpd {
 		product, err := r.UpdateProducts(transaction, *itemUpd.Product)
 		if err != nil {
 			return items, err
 		}
 
-		item = models.OrderItems{
-			ProductId:             product.Id,
-			RootId:                orderId,
-			ItemIndex:             itemUpd.ItemIndex,
-			WeightValue:           itemUpd.WeightValue,
-			WeightMeasureUnitCode: itemUpd.WeightMeasureUnitCode,
-			VolumeValue:           itemUpd.VolumeValue,
-			VolumeMeasureUnitCode: itemUpd.VolumeMeasureUnitCode,
-		}
+		itemUpd.ProductId = product.Id
+		itemUpd.RootId = &orderId
 
 		if itemUpd.Id != nil {
 			//Обновление текущей сущности
-			item.Id = *itemUpd.Id
 
-			err := transaction.Model(&item).Updates(&item).Error
+			err := transaction.Model(&itemUpd).Updates(&itemUpd).Error
 			if err != nil {
 				return items, err
 			}
 		} else {
-			err := transaction.Create(&item).Error
+			err := transaction.Create(&itemUpd).Error
 			if err != nil {
 				return items, err
 			}
 		}
 
-		items = append(items, item)
+		items = append(items, itemUpd)
 	}
 
 	return items, nil
 }
 
-func (r *OrderRepository) UpdateProducts(transaction *gorm.DB, productUpd models.ProductsRequest) (*models.Products, error) {
-
-	product := models.Products{
-		Name: *productUpd.Name,
-	}
+func (r *OrderRepository) UpdateProducts(transaction *gorm.DB, productUpd models.Products) (*models.Products, error) {
 
 	if productUpd.Id != nil {
 		//Обновление текущей сущности
-		product.Id = *productUpd.Id
-
-		err := transaction.Model(&product).Updates(&product).Error
+		err := transaction.Model(&productUpd).Updates(&productUpd).Error
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		err := transaction.Create(&product).Error
+		err := transaction.Create(&productUpd).Error
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &product, nil
+	return &productUpd, nil
 }
 
-func (r *OrderRepository) UpdateLocations(transaction *gorm.DB, locUpd *models.LocationUpsertRequest) (models.Locations, error) {
-	locations := models.Locations{
-		Name:    locUpd.Name,
-		Address: locUpd.Address,
-	}
-
-	if locations.Address == "" && locations.Name.Ru == "" && locations.Name.En == "" {
-		return locations, nil
+func (r *OrderRepository) UpdateLocations(transaction *gorm.DB, locUpd *models.Locations) (models.Locations, error) {
+	if locUpd == nil {
+		return models.Locations{}, nil
 	}
 
 	if locUpd.Id != nil {
 		//Обновление текущей сущности
-		locations.Id = *locUpd.Id
-		err := transaction.Model(&locations).Updates(&locations).Error
+		err := transaction.Model(locUpd).Updates(&locUpd).Error
 		if err != nil {
-			return locations, err
+			return *locUpd, err
 		}
 	} else {
-		err := transaction.Create(&locations).Error
+		err := transaction.Create(locUpd).Error
 		if err != nil {
-			return locations, err
+			return *locUpd, err
 		}
 	}
 
-	return locations, nil
+	return *locUpd, nil
 
 }
 

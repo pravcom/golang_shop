@@ -84,9 +84,12 @@ POST localhost:8080/order
 Content-Type: application/json
 
 {
-  "id": 4,
+  "id": 21,
   "comment": {
     "ru": "Измененное название",
     "en": "Changed name"
   }
 }
+
+###
+DELETE localhost:8080/order/21

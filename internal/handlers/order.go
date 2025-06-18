@@ -34,15 +34,15 @@ func (h *Handler) DeleteOrderById(c *gin.Context) {
 
 func (h *Handler) SaveOrder(c *gin.Context) {
 
-	var orderRequest models.OrderRequest
+	var order models.Orders
 
-	err := c.BindJSON(&orderRequest)
+	err := c.BindJSON(&order)
 	if err != nil {
 		newErrResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	orderResponse, err := h.service.Order.Save(orderRequest)
+	orderResponse, err := h.service.Order.Save(order)
 	if err != nil {
 		newErrResponse(c, http.StatusInternalServerError, err.Error())
 		return

@@ -15,86 +15,52 @@ type Multilang struct {
 }
 
 type MeasureUnits struct {
-	Id   uint64    `json:"id" gorm:"column:id;primary_key;auto_increment"`
-	Code string    `json:"code" gorm:"type:text;unique;not null"`
-	Name Multilang `json:"name" gorm:"type:jsonb"`
+	Id   *uint64    `json:"id" gorm:"column:id;primary_key;auto_increment"`
+	Code *string    `json:"code" gorm:"type:text;unique;not null"`
+	Name *Multilang `json:"name" gorm:"type:jsonb"`
 }
 
 type Products struct {
-	Id   uint64    `json:"id" gorm:"column:id;primary_key;auto_increment"`
-	Name Multilang `json:"name" gorm:"type:jsonb; column:name"`
+	Id   *uint64    `json:"id" gorm:"column:id;primary_key;auto_increment"`
+	Name *Multilang `json:"name" gorm:"type:jsonb; column:name"`
 }
 
 type Locations struct {
-	Id      uint64    `json:"id" gorm:"column:id;primary_key;auto_increment"`
-	Name    Multilang `json:"name" gorm:"type:jsonb; column:name"`
-	Address string    `json:"address" gorm:"type:text; column:address"`
+	Id      *uint64    `json:"id" gorm:"column:id;primary_key;auto_increment"`
+	Name    *Multilang `json:"name" gorm:"type:jsonb; column:name"`
+	Address *string    `json:"address" gorm:"type:text; column:address"`
 }
 
 type Orders struct {
-	Id                         uint64        `json:"id" gorm:"column:id;primary_key;auto_increment"`
-	Comment                    Multilang     `json:"comment" gorm:"type:jsonb;column:comment"`
-	SourceLocationId           uint64        `gorm:"column:source_location_id"`
+	Id                         *uint64       `json:"id" gorm:"column:id;primary_key;auto_increment"`
+	Comment                    *Multilang    `json:"comment" gorm:"type:jsonb;column:comment"`
+	SourceLocationId           *uint64       `json:"source_location_id" gorm:"column:source_location_id"`
 	SourceLocation             *Locations    `json:"source_location,omitempty" gorm:"foreignKey:SourceLocationId"`
-	DestinationLocationId      uint64        `gorm:"column:destination_location_id"`
+	DestinationLocationId      *uint64       `json:"destination_location_id" gorm:"column:destination_location_id"`
 	DestinationLocation        *Locations    `json:"destination_location" gorm:"foreignKey:DestinationLocationId"`
-	TotalItemsCount            int           `json:"total_items_count" gorm:"-"`
-	TotalWeightNumeric         float64       `json:"total_weight_numeric" gorm:"-"`
-	TotalWeightMeasureUnitCode string        `json:"total_weight_measure_unit_code gorm:column:total_weight_measure_unit_code"`
-	TotalWeightMeasureUnit     *MeasureUnits `json:"totalWeightMeasureUnit,omitempty" gorm:"foreignKey:TotalWeightMeasureUnitCode;references:Code"`
-	TotalVolume                float64       `json:"total_volume" gorm:"-"`
-	TotalVolumeMeasureUnitCode string        `json:"total_volume_measure_unit_code gorm:column:total_volume_measure_unit_code"`
-	TotalVolumeMeasureUnit     *MeasureUnits `json:"totalVolumeMeasureUnit,omitempty" gorm:"foreignKey:TotalVolumeMeasureUnitCode;references:Code"`
-	Items                      []*OrderItems `json:"items" gorm:"foreignKey:RootId"`
+	TotalItemsCount            *int          `json:"total_items_count" gorm:"-"`
+	TotalWeightNumeric         *float64      `json:"total_weight_numeric" gorm:"-"`
+	TotalWeightMeasureUnitCode *string       `json:"total_weight_measure_unit_code" gorm:"column:total_weight_measure_unit_code"`
+	TotalWeightMeasureUnit     *MeasureUnits `json:"total_weight_measure_unit,omitempty" gorm:"foreignKey:TotalWeightMeasureUnitCode;references:Code"`
+	TotalVolume                *float64      `json:"total_volume" gorm:"-"`
+	TotalVolumeMeasureUnitCode *string       `json:"total_volume_measure_unit_code" gorm:"column:total_volume_measure_unit_code"`
+	TotalVolumeMeasureUnit     *MeasureUnits `json:"total_volume_measure_unit,omitempty" gorm:"foreignKey:TotalVolumeMeasureUnitCode;references:Code"`
+	Items                      *[]OrderItems `json:"items" gorm:"foreignKey:RootId"`
 }
 
 type OrderItems struct {
-	Id                    uint64        `json:"id" gorm:"column:id;primary_key;auto_increment"`
-	RootId                uint64        `gorm:"column:root_id"`
+	Id                    *uint64       `json:"id" gorm:"column:id;primary_key;auto_increment"`
+	RootId                *uint64       `json:"root_id" gorm:"column:root_id"`
 	Root                  *Orders       `json:"root" gorm:"foreignKey:RootId;references:id"`
-	ProductId             uint64        `json:"product_id" gorm:"column:product_id"`
+	ProductId             *uint64       `json:"product_id" gorm:"column:product_id"`
 	Product               *Products     `json:"product" gorm:"foreignKey:ProductId"`
-	ItemIndex             int           `json:"item_index" gorm:"column:item_index"`
-	WeightValue           float64       `json:"weight_value" gorm:"column:weight_value"`
-	WeightMeasureUnitCode string        `gorm:"column:weight_measure_unit_code"`
-	WeightMeasureUnit     *MeasureUnits `json:"weight_measure_unit_code" gorm:"foreignKey:WeightMeasureUnitCode;references:Code"`
-	VolumeValue           float64       `json:"volume_value" gorm:"column:volume_value"`
-	VolumeMeasureUnitCode string        `gorm:"column:volume_measure_unit_code"`
+	ItemIndex             *int          `json:"item_index" gorm:"column:item_index"`
+	WeightValue           *float64      `json:"weight_value" gorm:"column:weight_value"`
+	WeightMeasureUnitCode *string       `json:"weight_measure_unit_code" gorm:"column:weight_measure_unit_code"`
+	WeightMeasureUnit     *MeasureUnits `json:"weight_measure_unit" gorm:"foreignKey:WeightMeasureUnitCode;references:Code"`
+	VolumeValue           *float64      `json:"volume_value" gorm:"column:volume_value"`
+	VolumeMeasureUnitCode *string       `json:"volume_measure_unit_code" gorm:"column:volume_measure_unit_code"`
 	VolumeMeasureUnit     *MeasureUnits `json:"volume_measure_unit" gorm:"foreignKey:VolumeMeasureUnitCode;references:Code"`
-}
-
-// OrderUpsertRequest - структура запроса
-type OrderRequest struct {
-	Id                         *uint64               `json:"id,omitempty"` // nil для создания
-	Comment                    Multilang             `json:"comment"`
-	SourceLocation             LocationUpsertRequest `json:"source_location"`
-	DestinationLocation        LocationUpsertRequest `json:"destination_location"`
-	Items                      []OrderItemRequest    `json:"items"`
-	TotalWeightMeasureUnitCode string                `json:"total_weight_measure_unit_code"`
-	TotalVolumeMeasureUnitCode string                `json:"total_volume_measure_unit_code"`
-}
-
-// LocationRequest - запрос для Location
-type LocationUpsertRequest struct {
-	Id      *uint64   `json:"id,omitempty"`
-	Name    Multilang `json:"name"`
-	Address string    `json:"address"`
-}
-
-type ProductsRequest struct {
-	Id   *uint64    `json:"id"`
-	Name *Multilang `json:"name"`
-}
-
-// OrderItemRequest - запрос для OrderItem
-type OrderItemRequest struct {
-	Id                    *uint64          `json:"id,omitempty"`
-	Product               *ProductsRequest `json:"product"`
-	ItemIndex             int              `json:"item_index"`
-	WeightValue           float64          `json:"weight_value"`
-	WeightMeasureUnitCode string           `json:"weight_measure_unit_code"`
-	VolumeValue           float64          `json:"volume_value"`
-	VolumeMeasureUnitCode string           `json:"volume_measure_unit_code"`
 }
 
 type OrderFilter struct {
@@ -140,29 +106,33 @@ func (m Multilang) Value() (driver.Value, error) {
 }
 
 func (o *Orders) AfterFind(tx *gorm.DB) (err error) {
-	o.TotalItemsCount = CalculateTotalItemsCount(o.Items)
-	o.TotalVolume = CalculateTotalVolume(o.Items)
-	o.TotalWeightNumeric = CalculateTotalWeight(o.Items)
+	totalCount := CalculateTotalItemsCount(o.Items)
+	totalVolume := CalculateTotalVolume(o.Items)
+	totalWeightNumeric := CalculateTotalWeight(o.Items)
+
+	o.TotalItemsCount = &totalCount
+	o.TotalVolume = &totalVolume
+	o.TotalWeightNumeric = &totalWeightNumeric
 
 	return nil
 }
 
-func CalculateTotalWeight(items []*OrderItems) float64 {
+func CalculateTotalWeight(items *[]OrderItems) float64 {
 	total := 0.0
-	for _, item := range items {
-		total += item.WeightValue
+	for _, item := range *items {
+		total += *item.WeightValue
 	}
 	return total
 }
 
-func CalculateTotalItemsCount(items []*OrderItems) int {
-	return len(items)
+func CalculateTotalItemsCount(items *[]OrderItems) int {
+	return len(*items)
 }
 
-func CalculateTotalVolume(items []*OrderItems) float64 {
+func CalculateTotalVolume(items *[]OrderItems) float64 {
 	total := 0.0
-	for _, item := range items {
-		total += item.VolumeValue
+	for _, item := range *items {
+		total += *item.VolumeValue
 	}
 
 	if total != 0.0 {

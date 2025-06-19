@@ -17,7 +17,15 @@ const dsn = "host=localhost user=postgres dbname=simple_shop password=postgres s
 const port = "8080"
 
 func main() {
-	storage := postgresql.New(dsn)
+
+	storage := postgresql.New(postgresql.DBconfig{
+		Host:    "localhost",
+		Port:    "8091",
+		User:    "postgres",
+		Pass:    "postgres",
+		DBName:  "simple_shop",
+		SSLMode: "disable",
+	})
 
 	defer storage.Close()
 

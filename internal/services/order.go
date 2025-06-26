@@ -51,7 +51,7 @@ func validateOrder(order models.Orders) error {
 				return ErrInvalidIndex
 			}
 
-			if item.Id != nil && *item.Id < 0 {
+			if item.Id != nil && *item.Id <= 0 {
 				return ErrInvalidItemId
 			}
 
